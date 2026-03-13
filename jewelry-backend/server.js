@@ -70,6 +70,36 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// 3.1.1 Create: Menambah Perhiasan Baru (Wajib Token/Login)
+app.post('/api/jewelry', authenticateToken, (req, res) => {
+    const { name, category, price, stock } = req.body;
+    const newItem = { 
+        id: Date.now(), 
+        name, 
+        category, 
+        price, 
+        stock,
+        createdBy: req.user.username // Mengambil nama penginput dari token JWT
+    };
+    jewelryItems.push(newItem);
+    res.status(201).json({ message: "Data perhiasan berhasil ditambahkan!", data: newItem });
+});
+
+// 3.1.2 Read: Melihat Semua Koleksi Perhiasan (Wajib Token/Login)
+app.get('/api/jewelry', authenticateToken, (req, res) => {
+    res.json({ 
+        total: jewelryItems.length,
+        items: jewelryItems 
+    });
+});
+
+// 3.1.3 Update & Delete (Opsional untuk melengkapi CRUD)
+app.delete('/api/jewelry/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    jewelryItems = jewelryItems.filter(item => item.id != id);
+    res.json({ message: `Perhiasan dengan ID ${id} berhasil dihapus.` });
+});
+
 // Menjalankan Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
