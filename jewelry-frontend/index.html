@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jewelry Management System - UTS</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; line-height: 1.6; }
+        .card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+        .form-group { margin-bottom: 10px; }
+        input { padding: 8px; width: 100%; box-sizing: border-box; }
+        button { padding: 10px 15px; background: #2c3e50; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        #jewelryList { margin-top: 20px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h2>💎 Jewelry Management System</h2>
+    <hr>
+
+    <div id="authSection">
+        <h3>Login / Register</h3>
+        <div class="form-group"><input type="text" id="username" placeholder="Username"></div>
+        <div class="form-group"><input type="password" id="password" placeholder="Password"></div>
+        <button onclick="handleAuth('register')">Register</button>
+        <button onclick="handleAuth('login')">Login</button>
+    </div>
+
+    <div id="mainSection" class="hidden">
+        <button onclick="logout()" style="background: #c0392b;">Logout</button>
+        <h3>Tambah Koleksi Perhiasan</h3>
+        <div class="form-group"><input type="text" id="jName" placeholder="Nama Perhiasan"></div>
+        <div class="form-group"><input type="text" id="jCategory" placeholder="Kategori (Cincin/Kalung)"></div>
+        <div class="form-group"><input type="number" id="jPrice" placeholder="Harga"></div>
+        <button onclick="addJewelry()">Tambah Perhiasan</button>
+
+        <h3>Katalog Perhiasan</h3>
+        <div id="jewelryList"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+
+        // Cek jika sudah login saat halaman dimuat
+        if (token) showMain();
+
+        async function handleAuth(type) {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const res = await fetch(`${API_URL}/auth/${type}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            const data = await res.json();
+            alert(data.message);
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                token = data.token;
+                showMain();
+            }
+        }
+
+        function showMain() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainSection').classList.remove('hidden');
+            loadJewelry();
+        }
+
+        async function loadJewelry() {
+            const res = await fetch(`${API_URL}/jewelry`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            const list = document.getElementById('jewelryList');
+            list.innerHTML = data.items.map(item => `
+                <div class="card">
+                    <strong>${item.name}</strong> (${item.category})<br>
+                    Harga: Rp${item.price.toLocaleString()} | Input oleh: ${item.createdBy}
+                </div>
+            `).join('');
+        }
+
+        async function addJewelry() {
+            const name = document.getElementById('jName').value;
+            const category = document.getElementById('jCategory').value;
+            const price = document.getElementById('jPrice').value;
+
+            await fetch(`${API_URL}/jewelry`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ name, category, price, stock: 10 })
+            });
+            loadJewelry();
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
