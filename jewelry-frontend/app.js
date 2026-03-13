@@ -35,10 +35,13 @@ async function loadJewelry() {
     const list = document.getElementById('jewelryList');
     list.innerHTML = data.items.map(item => `
     <div class="card">
-        <img src="${item.image}" alt="Gelang" style="width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom:10px;">
-        <strong>${item.name}</strong>
-        <span class="price">Rp ${Number(item.price).toLocaleString('id-ID')}</span>
-        <div class="meta">Petugas: ${item.createdBy}</div>
+        <img src="${item.image}" alt="${item.name}">
+        <div class="card-content">
+            <strong>${item.name}</strong>
+            <span class="price">Rp ${Number(item.price).toLocaleString('id-ID')}</span>
+            <div class="meta">Petugas: ${item.createdBy}</div>
+        </div>
+    </div>
     `).join('');
 }
 
