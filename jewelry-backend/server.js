@@ -72,13 +72,15 @@ const authenticateToken = (req, res, next) => {
 
 // 3.1.1 Create: Menambah Perhiasan Baru (Wajib Token/Login)
 app.post('/api/jewelry', authenticateToken, (req, res) => {
-    const { name, category, price, stock } = req.body;
+    const { name, category, price, imageUrl } = req.body;
     const newItem = { 
         id: Date.now(), 
         name, 
         category, 
         price, 
-        stock,
+        imageUrl,
+        // Berikan gambar default jika kosong
+        image: imageUrl || "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500",
         createdBy: req.user.username // Mengambil nama penginput dari token JWT
     };
     jewelryItems.push(newItem);
