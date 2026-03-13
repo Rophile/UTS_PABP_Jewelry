@@ -46,6 +46,7 @@ async function addJewelry() {
     const name = document.getElementById('jName').value;
     const category = document.getElementById('jCategory').value;
     const price = document.getElementById('jPrice').value;
+    const imageUrl = document.getElementById('jImage').value;
 
     await fetch(`${API_URL}/jewelry`, {
         method: 'POST',
