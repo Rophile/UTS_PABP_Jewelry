@@ -23,8 +23,6 @@ app.get('/', (req, res) => {
     });
 });
 
-// Menjalankan Server
-const PORT = process.env.PORT || 3000;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -59,7 +57,21 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ message: 'Login berhasil', token });
 });
 
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Mengambil token setelah kata 'Bearer'
 
+    if (!token) return res.status(401).json({ message: "Akses ditolak, token hilang!" });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ message: "Token tidak valid!" });
+        req.user = user;
+        next(); // Lanjut ke proses CRUD
+    });
+};
+
+// Menjalankan Server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server Jewelry berjalan di http://localhost:${PORT}`);
 });
